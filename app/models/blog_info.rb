@@ -25,8 +25,7 @@ class BlogInfo < ActiveRecord::Base
   end
 
   def self.updated_today?
-    # update_latest_info
-    updated_dates_by_today.last == Date.today
+    updated_dates_by_today.last == Date.current
   end
 
   def self.updated_dates_by_yesterday
