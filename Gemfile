@@ -15,11 +15,16 @@ gem 'slim-rails'
 gem 'unicorn'
 gem 'unicorn-rails'
 gem 'feed-normalizer'
+gem 'newrelic_rpm'
+group :production, :staging do
+  gem 'rails_12factor'
+end
 group :development do
   gem 'better_errors'
   gem 'binding_of_caller', :platforms=>[:mri_21]
   gem 'quiet_assets'
   gem 'rails_layout'
+  gem 'heroku_san'
 end
 group :development, :test do
   gem 'factory_girl_rails'
