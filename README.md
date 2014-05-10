@@ -1,4 +1,3 @@
-Mah365 Api
-=========
+## mah365 API
 
 API for mah365 dashing.
