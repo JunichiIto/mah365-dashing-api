@@ -6,6 +6,15 @@ class BlogInfo < ActiveRecord::Base
   scope :by_yesterday, -> { where(published_at: span_by_yesterday) }
   scope :by_today, -> { where(published_at: span_by_today) }
 
+  def self.info_all
+    {
+        everyday_updated_by_yesterday: everyday_updated_by_yesterday?,
+        update_rate: update_rate,
+        updated_today: updated_today?,
+        updated_count_by_today: updated_dates_by_today.count
+    }
+  end
+
   def self.everyday_updated_by_yesterday?
     dates_by_yesterday == updated_dates_by_yesterday
   end
