@@ -11,7 +11,8 @@ class BlogInfo < ActiveRecord::Base
         everyday_updated_by_yesterday: everyday_updated_by_yesterday?,
         update_rate: update_rate,
         updated_today: updated_today?,
-        updated_count_by_today: updated_dates_by_today.count
+        updated_count_by_today: updated_dates_by_today.count,
+        todays_post: todays_post.try(:title)
     }
   end
 
@@ -26,6 +27,10 @@ class BlogInfo < ActiveRecord::Base
 
   def self.updated_today?
     updated_dates_by_today.last == Date.current
+  end
+
+  def self.todays_post
+    updated_dates_by_today.last if updated_today?
   end
 
   def self.updated_dates_by_yesterday
