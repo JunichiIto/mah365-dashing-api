@@ -30,7 +30,7 @@ class BlogInfo < ActiveRecord::Base
   end
 
   def self.todays_post
-    updated_dates_by_today.last if updated_today?
+    self.where(published_at: Date.current.beginning_of_day..Date.current.end_of_day).first if updated_today?
   end
 
   def self.updated_dates_by_yesterday
