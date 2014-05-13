@@ -39,11 +39,11 @@ class BlogInfo < ActiveRecord::Base
     end
 
     def updated_dates_by_yesterday
-      updated_dates(self.by_yesterday)
+      updated_dates by_yesterday
     end
 
     def updated_dates_by_today
-      updated_dates(self.by_today)
+      updated_dates by_today
     end
 
     def updated_dates(relation)
@@ -65,25 +65,19 @@ class BlogInfo < ActiveRecord::Base
     def update_latest_info
       logger.info "####### Start update_latest_info"
 
-      feed_hash = fetch_latest_feed
+      feed = fetch_latest_feed
 
-      if feed_hash[:published_at].to_date.in?(updated_dates_by_today)
+      if feed[:published_at].to_date.in?(updated_dates_by_today)
         logger.info "[INFO] Already updated."
       else
-        logger.info "[INFO] Save: #{feed_hash.inspect}"
-        BlogInfo.create!(feed_hash)
+        logger.info "[INFO] Save: #{feed.inspect}"
+        BlogInfo.create!(feed)
       end
       logger.info "####### Complete update_latest_info"
     end
 
     def fetch_latest_feed
-      logger.info "[INFO] Open: #{RSS_URL}"
-      feed = FeedNormalizer::FeedNormalizer.parse(open(RSS_URL), force_parser: FeedNormalizer::SimpleRssParser).items[0]
-      {
-          title: feed.title,
-          published_at: feed.date_published,
-          url: feed.urls[0]
-      }
+      fetch_feeds(RSS_URL)[0]
     end
 
     def update_all
@@ -91,28 +85,35 @@ class BlogInfo < ActiveRecord::Base
         logger.info "[INFO] Destroy all."
         self.destroy_all
 
-        paged = 1
-        while paged == 1 or BlogInfo.last.published_at.to_date > BEGINNING_OF_YEAR do
-          url = "#{RSS_URL}?paged=#{paged}"
-
-          logger.info "[INFO] Open: #{url}"
-          feeds = FeedNormalizer::FeedNormalizer.parse(open(url), force_parser: FeedNormalizer::SimpleRssParser).items
-          feeds.each do |feed|
-            feed_hash = {
-                title: feed.title,
-                published_at: feed.date_published,
-                url: feed.urls[0]
-            }
-            logger.info "[INFO] Save: #{feed_hash.inspect}"
-            BlogInfo.create!(feed_hash)
-          end
-
-          logger.info "[INFO] Last info: #{BlogInfo.last.inspect}"
-
-          paged += 1
-          sleep 2
-        end
+        create_feed_history
       end
+    end
+
+    def create_feed_history
+      paged = 1
+      while paged == 1 or BlogInfo.last.published_at.to_date > BEGINNING_OF_YEAR do
+        url = "#{RSS_URL}?paged=#{paged}"
+
+        fetch_feeds(url).each do |feed|
+          logger.info "[INFO] Save: #{feed.inspect}"
+          BlogInfo.create!(feed)
+        end
+
+        paged += 1
+        sleep 2
+      end
+    end
+
+    def fetch_feeds(url)
+      logger.info "[INFO] Open: #{url}"
+      feeds = FeedNormalizer::FeedNormalizer.parse(open(url), force_parser: FeedNormalizer::SimpleRssParser).items
+      feeds.map{|feed|
+        {
+            title: feed.title,
+            published_at: feed.date_published,
+            url: feed.urls[0]
+        }
+      }
     end
   end
 end
