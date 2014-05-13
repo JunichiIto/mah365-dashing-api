@@ -1,6 +1,10 @@
 class BlogInfo < ActiveRecord::Base
   RSS_URL = "http://blog.mah-lab.com/feed/"
 
+  JST_OFFSET = Rational(9, 24).freeze
+  BEGINNING_OF_YEAR = DateTime.new(2013, 12, 5, 0, 0, 0, JST_OFFSET).freeze
+  END_OF_YEAR = BEGINNING_OF_YEAR.since(1.year).freeze
+
   validates :title, :published_at, :url, presence: true
 
   scope :by_yesterday, -> { where(published_at: span_by_yesterday) }
@@ -49,16 +53,12 @@ class BlogInfo < ActiveRecord::Base
     span_by_yesterday.map(&:to_date)
   end
 
-  def self.blog_start_date
-    Date.new(2013, 12, 5)
-  end
-
   def self.span_by_yesterday
-    blog_start_date.to_datetime..DateTime.yesterday.end_of_day
+    BEGINNING_OF_YEAR..DateTime.yesterday.end_of_day
   end
 
   def self.span_by_today
-    blog_start_date.to_datetime..DateTime.current.end_of_day
+    BEGINNING_OF_YEAR..DateTime.current.end_of_day
   end
 
   def self.update_latest_info
@@ -90,21 +90,8 @@ class BlogInfo < ActiveRecord::Base
       logger.info "[INFO] Destroy all."
       self.destroy_all
 
-      url = RSS_URL
-      logger.info "[INFO] Open: #{url}"
-      feeds = FeedNormalizer::FeedNormalizer.parse(open(url), force_parser: FeedNormalizer::SimpleRssParser).items
-      feeds.each do |feed|
-        feed_hash = {
-            title: feed.title,
-            published_at: feed.date_published,
-            url: feed.urls[0]
-        }
-        logger.info "[INFO] Save: #{feed_hash.inspect}"
-        BlogInfo.create!(feed_hash)
-      end
-
-      paged = 2
-      while BlogInfo.last.published_at.to_date > blog_start_date do
+      paged = 1
+      while paged == 1 or BlogInfo.last.published_at.to_date > BEGINNING_OF_YEAR do
         url = "#{RSS_URL}?paged=#{paged}"
 
         logger.info "[INFO] Open: #{url}"
