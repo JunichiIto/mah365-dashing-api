@@ -13,17 +13,11 @@ class BlogInfo < ActiveRecord::Base
   class << self
     def info_all
       {
-          everyday_updated_by_yesterday: everyday_updated_by_yesterday?,
           update_rate: update_rate,
-          updated_today: updated_today?,
           updated_count_by_today: updated_dates_by_today.count,
           todays_post: todays_post.try(:title),
-          dates_to_go: (Date.current..END_OF_YEAR.to_date).count
+          dates_to_go: dates_to_go
       }
-    end
-
-    def everyday_updated_by_yesterday?
-      dates_by_yesterday == updated_dates_by_yesterday
     end
 
     def update_rate
@@ -31,12 +25,13 @@ class BlogInfo < ActiveRecord::Base
       rate > 100 ? 100 : rate
     end
 
-    def updated_today?
-      updated_dates_by_today.last == Date.current
+    def todays_post
+      self.where(published_at: Date.current.beginning_of_day..Date.current.end_of_day).first
     end
 
-    def todays_post
-      self.where(published_at: Date.current.beginning_of_day..Date.current.end_of_day).first if updated_today?
+    def dates_to_go
+      count = (Date.current..END_OF_YEAR.to_date).count
+      count < 0 ? 0 : count
     end
 
     def updated_dates_by_yesterday
