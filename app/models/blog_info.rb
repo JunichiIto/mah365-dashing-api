@@ -61,7 +61,7 @@ class BlogInfo < ActiveRecord::Base
     def update_latest_info
       logger.info "####### Start update_latest_info"
 
-      feed = fetch_latest_feed
+      feed = fetch_feeds(RSS_URL).first
 
       if feed[:published_at].to_date.in?(updated_dates_by_today)
         logger.info "[INFO] Already updated."
@@ -70,10 +70,6 @@ class BlogInfo < ActiveRecord::Base
         BlogInfo.create!(feed)
       end
       logger.info "####### Complete update_latest_info"
-    end
-
-    def fetch_latest_feed
-      fetch_feeds(RSS_URL)[0]
     end
 
     def update_all
