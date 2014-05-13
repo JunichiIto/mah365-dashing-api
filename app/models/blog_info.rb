@@ -3,7 +3,7 @@ class BlogInfo < ActiveRecord::Base
 
   JST_OFFSET = Rational(9, 24).freeze
   BEGINNING_OF_YEAR = DateTime.new(2013, 12, 5, 0, 0, 0, JST_OFFSET).freeze
-  END_OF_YEAR = BEGINNING_OF_YEAR.since(1.year).freeze
+  END_OF_YEAR = BEGINNING_OF_YEAR.since(1.year).ago(1.day).end_of_day.freeze
 
   validates :title, :published_at, :url, presence: true
 
@@ -17,7 +17,8 @@ class BlogInfo < ActiveRecord::Base
           update_rate: update_rate,
           updated_today: updated_today?,
           updated_count_by_today: updated_dates_by_today.count,
-          todays_post: todays_post.try(:title)
+          todays_post: todays_post.try(:title),
+          dates_to_go: (Date.current..END_OF_YEAR.to_date).count
       }
     end
 
