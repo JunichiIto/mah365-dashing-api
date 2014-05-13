@@ -49,12 +49,16 @@ class BlogInfo < ActiveRecord::Base
     span_by_yesterday.map(&:to_date)
   end
 
+  def self.blog_start_date
+    Date.new(2013, 12, 5)
+  end
+
   def self.span_by_yesterday
-    DateTime.current.beginning_of_year..DateTime.yesterday.end_of_day
+    blog_start_date.to_datetime..DateTime.yesterday.end_of_day
   end
 
   def self.span_by_today
-    DateTime.current.beginning_of_year..DateTime.current.end_of_day
+    blog_start_date.to_datetime..DateTime.current.end_of_day
   end
 
   def self.update_latest_info
@@ -100,7 +104,7 @@ class BlogInfo < ActiveRecord::Base
       end
 
       paged = 2
-      while BlogInfo.last.published_at.to_date > "2014-01-01".to_date do
+      while BlogInfo.last.published_at.to_date > blog_start_date do
         url = "#{RSS_URL}?paged=#{paged}"
 
         logger.info "[INFO] Open: #{url}"
