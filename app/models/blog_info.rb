@@ -16,6 +16,7 @@ class BlogInfo < ActiveRecord::Base
           update_rate: update_rate,
           updated_count_by_today: updated_dates_by_today.count,
           todays_post: todays_post.try(:title),
+          yesterdays_post: yesterdays_post.try(:title),
           dates_to_go: dates_to_go
       }
     end
@@ -26,7 +27,16 @@ class BlogInfo < ActiveRecord::Base
     end
 
     def todays_post
-      self.where(published_at: Date.current.beginning_of_day..Date.current.end_of_day).first
+      post_for Date.current
+    end
+
+    def yesterdays_post
+      post_for Date.yesterday
+    end
+
+    def post_for(date)
+      date_range = date.beginning_of_day..date.end_of_day
+      self.where(published_at: date_range).first
     end
 
     def dates_to_go
