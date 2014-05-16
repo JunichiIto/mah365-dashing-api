@@ -2,6 +2,7 @@ class BlogInfo < ActiveRecord::Base
   RSS_URL = "http://blog.mah-lab.com/feed/"
 
   JST_OFFSET = Rational(9, 24).freeze
+  JST_OFFSET_FOR_TIME = "+09:00"
   BEGINNING_OF_YEAR = DateTime.new(2013, 12, 5, 0, 0, 0, JST_OFFSET).freeze
   END_OF_YEAR = BEGINNING_OF_YEAR.since(1.year).ago(1.day).end_of_day.freeze
 
@@ -112,7 +113,7 @@ class BlogInfo < ActiveRecord::Base
       feeds.map{|feed|
         {
             title: feed.title,
-            published_at: feed.date_published,
+            published_at: feed.date_published.getlocal(JST_OFFSET_FOR_TIME),
             url: feed.urls[0]
         }
       }
