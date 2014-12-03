@@ -13,13 +13,24 @@ class BlogInfo < ActiveRecord::Base
 
   class << self
     def info_all
-      {
-          update_rate: update_rate,
-          updated_count_by_today: updated_dates_by_today.count,
-          todays_post: todays_post.try(:title),
-          yesterdays_post: yesterdays_post.try(:title),
-          dates_to_go: dates_to_go
-      }
+      end_date = '2014-12-05'.to_date
+      if Date.today < end_date
+        {
+            update_rate: update_rate,
+            updated_count_by_today: updated_dates_by_today.count,
+            todays_post: todays_post.try(:title),
+            yesterdays_post: yesterdays_post.try(:title),
+            dates_to_go: dates_to_go
+        }
+      else
+        {
+            update_rate: 100,
+            updated_count_by_today: 365,
+            todays_post: post_for(end_date).try(:title),
+            yesterdays_post: post_for(end_date.ago(1.day)).try(:title),
+            dates_to_go: 0
+        }
+      end
     end
 
     def update_rate
