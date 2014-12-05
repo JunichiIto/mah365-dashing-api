@@ -26,8 +26,8 @@ class BlogInfo < ActiveRecord::Base
         {
             update_rate: 100,
             updated_count_by_today: 365,
-            todays_post: post_for(end_date).try(:title),
-            yesterdays_post: post_for(end_date.ago(1.day)).try(:title),
+            todays_post: post_for(end_date.ago(1.day)).try(:title),
+            yesterdays_post: post_for(end_date.ago(2.days)).try(:title),
             dates_to_go: 0
         }
       end
